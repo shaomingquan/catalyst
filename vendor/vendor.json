@@ -1,0 +1,13 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "BMaJDqifvwJ5LWPOiZn9Rjet/94=",
+			"path": "github.com/gin-gonic/gin",
+			"revision": "6d913fc343cfac80d656db5be67a0ffb1323ba0d",
+			"revisionTime": "2018-03-29T06:33:07Z"
+		}
+	],
+	"rootPath": "webcore"
+}
