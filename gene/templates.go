@@ -19,7 +19,7 @@ func init() {
 
 var importerTpl = `package imports
 
-import "go-starter-2018/core"
+import core "github.com/shaomingquan/webcore"
 import "go-starter-2018/apps/{{.appName}}"
 
 func Start{{.appName}}(app *core.App) {
