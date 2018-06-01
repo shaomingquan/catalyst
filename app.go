@@ -1,6 +1,8 @@
 package core
 
 import (
+	"strings"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,7 +25,7 @@ type App struct {
 
 // Collect collect and then make a router item
 func (app *App) Collect(
-	method string, // http verb
+	method string, // http verb list
 	prefix string, // router
 	handler RouteHandler, // handler
 ) {
@@ -45,30 +47,32 @@ func (app *App) Collect(
 // Start start app
 func (app *App) Start() {
 	engine := app.ginEngine
-	// TODO: 安装路由
 	for _, router := range app.routers {
-		if router.method == "GET" {
-			engine.GET(
-				router.prefix,
-				gin.HandlerFunc(router.handler),
-			)
-		} else if router.method == "POST" {
-			engine.POST(
-				router.prefix,
-				gin.HandlerFunc(router.handler),
-			)
-		} else if router.method == "PUT" {
-			engine.PUT(
-				router.prefix,
-				gin.HandlerFunc(router.handler),
-			)
-		} else if router.method == "DELETE" {
-			engine.DELETE(
-				router.prefix,
-				gin.HandlerFunc(router.handler),
-			)
-		} else {
-			panic(wrongMethodError{})
+		verbs := parseHTTPVerbs(router.method)
+		for _, method := range verbs {
+			if method == "GET" {
+				engine.GET(
+					router.prefix,
+					gin.HandlerFunc(router.handler),
+				)
+			} else if method == "POST" {
+				engine.POST(
+					router.prefix,
+					gin.HandlerFunc(router.handler),
+				)
+			} else if method == "PUT" {
+				engine.PUT(
+					router.prefix,
+					gin.HandlerFunc(router.handler),
+				)
+			} else if method == "DELETE" {
+				engine.DELETE(
+					router.prefix,
+					gin.HandlerFunc(router.handler),
+				)
+			} else {
+				panic(wrongMethodError{})
+			}
 		}
 	}
 
@@ -77,4 +81,9 @@ func (app *App) Start() {
 	}
 
 	engine.Run(app.Config["address"])
+}
+
+func parseHTTPVerbs(method string) []string {
+	methods := strings.Split(method, ",")
+	return methods
 }

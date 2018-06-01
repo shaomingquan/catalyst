@@ -20,13 +20,13 @@ func init() {
 var importerTpl = `package imports
 
 import core "github.com/shaomingquan/webcore"
-import "{{.rootDir}}/apps/{{.appName}}"
+import "{{.rootDir}}{{.pkgDir}}"
 
 func Start{{.appName}}(app *core.App) {
 	{{range $item := .routers}}
 	app.Collect(
 		{{$.appName}}.MethodOf{{$item}}, 
-		"/{{$.appName}}" + {{$.appName}}.PrefixOf{{$item}}, 
+		"{{$.prefix}}" + {{$.appName}}.PrefixOf{{$item}}, 
 		{{$.appName}}.HandlerOf{{$item}},
 	)
 	{{end}}
