@@ -37,8 +37,12 @@ func parseNameFromGenDecl(node *ast.GenDecl) string {
 	if !ok {
 		return ""
 	}
-	kind := specVal.Values[0].(*ast.BasicLit).Kind
-	if kind.String() != "STRING" {
+	kind, ok := specVal.Values[0].(*ast.BasicLit)
+	if ok {
+		if kind.Kind.String() != "STRING" {
+			return ""
+		}
+	} else {
 		return ""
 	}
 	return specVal.Names[0].Name

@@ -17,14 +17,38 @@ type routerItem struct {
 
 // App main
 type App struct {
-	Name      string
-	Config    map[string]string
-	ginEngine *gin.Engine
-	routers   []*routerItem
+	Name         string
+	Config       map[string]string
+	rootRouter   *gin.RouterGroup
+	ginEngine    *gin.Engine
+	routerGroups map[string]*gin.RouterGroup
+	routers      map[string][]*routerItem
+	midwares     map[string][]gin.HandlerFunc
 }
 
-// Collect collect and then make a router item
-func (app *App) Collect(
+// MidWare collect midwares
+func (app *App) MidWare(
+	group string,
+	handler gin.HandlerFunc,
+) {
+	if _, ok := app.midwares[group]; !ok {
+		app.midwares[group] = []gin.HandlerFunc{}
+	}
+	app.midwares[group] = append(app.midwares[group], handler)
+}
+
+// Init init vars
+func (app *App) Init() {
+	app.ginEngine = gin.Default()
+	app.rootRouter = app.ginEngine.Group("/")
+	app.routerGroups = map[string]*gin.RouterGroup{}
+	app.routers = map[string][]*routerItem{}
+	app.midwares = map[string][]gin.HandlerFunc{}
+}
+
+// Router collect and then make a router item
+func (app *App) Router(
+	group string,
 	method string, // http verb list
 	prefix string, // router
 	handler RouteHandler, // handler
@@ -34,44 +58,85 @@ func (app *App) Collect(
 		prefix:  prefix,
 		handler: handler,
 	}
-	if app.ginEngine == nil {
-		app.ginEngine = gin.Default()
+	if _, ok := app.routers[group]; !ok {
+		app.routers[group] = []*routerItem{}
 	}
-	if app.routers == nil {
-		app.routers = []*routerItem{}
-	}
-	app.routers = append(app.routers, &item)
+	app.routers[group] = append(app.routers[group], &item)
 
+}
+
+// SortedRouters asc sort by group length
+func (app *App) SortedRouters() []string {
+	_routers := [200]string{}
+	for group := range app.routers { // base on routers
+		_routers[len(group)] = group
+	}
+	routers := []string{}
+	for _, router := range _routers {
+		if router != "" {
+			routers = append(routers, router)
+		}
+	}
+	return routers
+}
+
+// AutoGroup make group logic match
+func (app *App) AutoGroup(group string) *gin.RouterGroup {
+
+	if routerGroup, ok := app.routerGroups[group]; ok {
+		return routerGroup
+	}
+
+	groupStrs := strings.Split(group, "/")
+	currentRouterGroup := app.rootRouter
+	for _, currentGroupStr := range groupStrs {
+		currentGroupStr = "/" + currentGroupStr
+		if currentGroupStr == "/" {
+			continue
+		}
+		if _, ok := app.routerGroups[currentGroupStr]; !ok {
+			app.routerGroups[currentGroupStr] = currentRouterGroup.Group(currentGroupStr)
+		}
+		currentRouterGroup = app.routerGroups[currentGroupStr]
+	}
+	app.routerGroups[group] = currentRouterGroup
+	return currentRouterGroup
 }
 
 // Start start app
 func (app *App) Start() {
-	engine := app.ginEngine
-	for _, router := range app.routers {
-		verbs := parseHTTPVerbs(router.method)
-		for _, method := range verbs {
-			if method == "GET" {
-				engine.GET(
-					router.prefix,
-					gin.HandlerFunc(router.handler),
-				)
-			} else if method == "POST" {
-				engine.POST(
-					router.prefix,
-					gin.HandlerFunc(router.handler),
-				)
-			} else if method == "PUT" {
-				engine.PUT(
-					router.prefix,
-					gin.HandlerFunc(router.handler),
-				)
-			} else if method == "DELETE" {
-				engine.DELETE(
-					router.prefix,
-					gin.HandlerFunc(router.handler),
-				)
-			} else {
-				panic(wrongMethodError{})
+	sortedGroups := app.SortedRouters()
+	for _, group := range sortedGroups {
+		engine := app.AutoGroup(group)
+		for _, midware := range app.midwares[group] {
+			engine.Use(midware)
+		}
+		for _, router := range app.routers[group] {
+			verbs := parseHTTPVerbs(router.method)
+			for _, method := range verbs {
+				if method == "GET" {
+					engine.GET(
+						router.prefix,
+						gin.HandlerFunc(router.handler),
+					)
+				} else if method == "POST" {
+					engine.POST(
+						router.prefix,
+						gin.HandlerFunc(router.handler),
+					)
+				} else if method == "PUT" {
+					engine.PUT(
+						router.prefix,
+						gin.HandlerFunc(router.handler),
+					)
+				} else if method == "DELETE" {
+					engine.DELETE(
+						router.prefix,
+						gin.HandlerFunc(router.handler),
+					)
+				} else {
+					panic(wrongMethodError{})
+				}
 			}
 		}
 	}
@@ -80,7 +145,7 @@ func (app *App) Start() {
 		panic(noAddressError{})
 	}
 
-	engine.Run(app.Config["address"])
+	app.ginEngine.Run(app.Config["address"])
 }
 
 func parseHTTPVerbs(method string) []string {

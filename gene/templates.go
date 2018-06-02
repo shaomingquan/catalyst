@@ -12,6 +12,8 @@ var bootTpl = `package main
 import "{{.rootDir}}/imports"
 
 func init() {
+	app.Init()
+
 	// ###
 }
 
@@ -22,11 +24,12 @@ var importerTpl = `package imports
 import core "github.com/shaomingquan/webcore"
 import "{{.rootDir}}{{.pkgDir}}"
 
-func Start{{.appName}}(app *core.App) {
+func Start{{.appid}}(app *core.App) {
 	{{range $item := .routers}}
-	app.Collect(
+	app.Router(
+		"{{$.prefix}}",
 		{{$.appName}}.MethodOf{{$item}}, 
-		"{{$.prefix}}" + {{$.appName}}.PrefixOf{{$item}}, 
+		{{$.appName}}.PrefixOf{{$item}}, 
 		{{$.appName}}.HandlerOf{{$item}},
 	)
 	{{end}}
