@@ -1,8 +1,10 @@
 package gene
 
-import "go/ast"
+import (
+	"go/ast"
+)
 
-type traverseFunc func(string, string)
+type traverseFunc func(string, string, interface{})
 
 // traverse width only first level, and fast reture
 func traverse(current ast.Node, fn traverseFunc) ast.Node {
@@ -11,15 +13,15 @@ func traverse(current ast.Node, fn traverseFunc) ast.Node {
 		walkDeclList(n.Decls, fn)
 	case *ast.GenDecl:
 		// 取出路由定义和方法定义
-		name := parseNameFromGenDecl(n)
+		name, appends := parseNameFromGenDecl(n)
 		if name != "" {
-			fn(name, "var")
+			fn(name, "var", appends)
 		}
 	case *ast.FuncDecl:
 		// 取出路由
 		name := parseNameFromFuncDecl(n)
 		if name != "" {
-			fn(name, "fn")
+			fn(name, "fn", "")
 		}
 	}
 	return current
@@ -32,21 +34,30 @@ func walkDeclList(list []ast.Decl, fn traverseFunc) {
 }
 
 // 暂时无法识别多赋值
-func parseNameFromGenDecl(node *ast.GenDecl) string {
+func parseNameFromGenDecl(node *ast.GenDecl) (string, interface{}) {
 	specVal, ok := node.Specs[0].(*ast.ValueSpec)
 	if !ok {
-		return ""
+		return "", nil
 	}
-	kind, ok := specVal.Values[0].(*ast.BasicLit)
-	if ok {
-		if kind.Kind.String() != "STRING" {
-			return ""
-		}
-	} else {
-		return ""
-	}
-	return specVal.Names[0].Name
 
+	name := specVal.Names[0].Name
+	if name == "MiddlewaresComposer" { // middware decl
+		list := specVal.Values[0].(*ast.CompositeLit)
+		midwares := []string{}
+		for _, exp := range list.Elts {
+			importStr := exp.(*ast.BasicLit).Value
+			if importStr == "" {
+				continue
+			}
+			l := len(importStr)
+			importStr = importStr[:l-1]
+			importStr = importStr[1:]
+			midwares = append(midwares, importStr)
+		}
+		return name, midwares
+	} else {
+		return name, nil
+	}
 }
 
 func parseNameFromFuncDecl(node *ast.FuncDecl) string {

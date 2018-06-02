@@ -23,8 +23,15 @@ var importerTpl = `package imports
 
 import core "github.com/shaomingquan/webcore"
 import "{{.rootDir}}{{.pkgDir}}"
+{{range $pkg := .pkgs}}
+import {{$pkg.pkgid}} "{{$.rootDir}}/{{$pkg.pkg}}"
+{{end}}
 
 func Start{{.appid}}(app *core.App) {
+	{{range $item := .midwares}}
+	app.MidWare("{{$.prefix}}", {{$item.pkgid}}.{{$item.method}}())
+	{{end}}
+
 	{{range $item := .routers}}
 	app.Router(
 		"{{$.prefix}}",

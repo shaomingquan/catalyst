@@ -12,19 +12,30 @@ type Gene struct {
 }
 
 var (
-	fset       = token.NewFileSet()
-	collection = routerItemMap{}
+	fset     = token.NewFileSet()
+	routers  = routerItemMap{}
+	midwares = midwareItemSet{}
 )
 
 // Collect every _ file do this
 func (g *Gene) Collect(f *ast.File) {
-	traverseCallback := func(name, t string) {
+	traverseCallback := func(name, t string, appends interface{}) {
+
+		if name == "MiddlewaresComposer" {
+			mids := appends.([]string)
+			for _, mid := range mids {
+				println("@@@", mid)
+				midwares.collect(mid)
+			}
+			return
+		}
+
 		if strings.HasPrefix(name, "PrefixOf") {
-			collection.collect(name[8:], "prefix")
+			routers.collect(name[8:], "prefix")
 		} else if strings.HasPrefix(name, "MethodOf") {
-			collection.collect(name[8:], "method")
+			routers.collect(name[8:], "method")
 		} else if strings.HasPrefix(name, "HandlerOf") {
-			collection.collect(name[9:], "router")
+			routers.collect(name[9:], "router")
 		}
 	}
 	traverse(f, traverseCallback)
@@ -32,12 +43,17 @@ func (g *Gene) Collect(f *ast.File) {
 
 // OutputRouters _ files output the routers togother
 func (g *Gene) OutputRouters() []string {
-	routers := []string{}
+	rs := []string{}
 	dumpCallback := func(name string) {
-		routers = append(routers, name)
+		rs = append(rs, name)
 	}
-	collection.dump(&dumpCallback)
-	return routers
+	routers.dump(&dumpCallback)
+	return rs
+}
+
+// OutputMidwares output midware ast result
+func (g *Gene) OutputMidwares() ([]map[string]string, []map[string]string) {
+	return midwares.dump()
 }
 
 // IsUnderscoreFile is _ file
