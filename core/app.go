@@ -1,10 +1,17 @@
 package core
 
 import (
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+type Conf struct {
+	AppName string `json:"appname"`
+	Port    int    `json:"port"`
+	AppRoot string `json:"approot"`
+}
 
 // RouteHandler callback func
 type RouteHandler func(ctx *gin.Context)
@@ -17,8 +24,7 @@ type routerItem struct {
 
 // App main
 type App struct {
-	Name         string
-	Config       map[string]string
+	Config       *Conf
 	rootRouter   *gin.RouterGroup
 	ginEngine    *gin.Engine
 	routerGroups map[string]*gin.RouterGroup
@@ -141,11 +147,11 @@ func (app *App) Start() {
 		}
 	}
 
-	if app.Config["address"] == "" {
+	if app.Config.Port == 0 {
 		panic(noAddressError{})
 	}
 
-	app.ginEngine.Run(app.Config["address"])
+	app.ginEngine.Run(":" + strconv.Itoa(app.Config.Port))
 }
 
 func parseHTTPVerbs(method string) []string {

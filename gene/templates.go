@@ -2,10 +2,10 @@ package gene
 
 import (
 	"bytes"
-	"encoding/json"
 	"go/format"
 	"html/template"
 	"log"
+	"strings"
 )
 
 var bootTpl = `package main
@@ -13,16 +13,22 @@ var bootTpl = `package main
 import "{{.rootDir}}/imports"
 
 func init() {
-	app.Init()
+    go func() {
+        //la prepare // wait for prepare
+        app.Init()
+    
+        // ###
 
-	// ###
+        loaded //la 1 // i am loaded
+    }()
+
 }
 
 // auto generate by _, dont modify`
 
 var importerTpl = `package imports
 
-import core "github.com/shaomingquan/webcore"
+import core "github.com/shaomingquan/webcore/core"
 import "{{.rootDir}}{{.pkgDir}}"
 {{range $pkg := .pkgs}}
 import {{$pkg.pkgid}} "{{$.rootDir}}/{{$pkg.pkg}}"
@@ -64,12 +70,13 @@ func tplCommon(data map[string]interface{}, tpl string) []byte {
 
 // MakeBootFile boot file template
 func MakeBootFile(data map[string]interface{}) []byte {
-	return tplCommon(data, bootTpl)
+	f := tplCommon(data, bootTpl)
+	filestring := string(f)
+	filestring = strings.Replace(filestring, "//la", "<-", -1)
+	return []byte(filestring)
 }
 
 // MakeImporterFile importer file template
 func MakeImporterFile(data map[string]interface{}) []byte {
-	databyted, _ := json.Marshal(data)
-	println(string(databyted))
 	return tplCommon(data, importerTpl)
 }

@@ -24,7 +24,6 @@ func (g *Gene) Collect(f *ast.File) {
 		if name == "MiddlewaresComposer" {
 			mids := appends.([]string)
 			for _, mid := range mids {
-				println("@@@", mid)
 				midwares.collect(mid)
 			}
 			return

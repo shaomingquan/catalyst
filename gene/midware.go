@@ -72,7 +72,6 @@ func (mset *midwareItemSet) dump() ([]map[string]string, []map[string]string) {
 		for index, p := range item.params {
 			params[index] = "`" + p + "`" // why " occur error????
 		}
-		println(5555, strings.Join(params, ", "))
 		retset = append(retset, map[string]string{
 			"pkg":    item.pkg,
 			"method": item.method,
