@@ -2,6 +2,7 @@ package gene
 
 import (
 	"bytes"
+	"encoding/json"
 	"go/format"
 	"html/template"
 	"log"
@@ -29,7 +30,7 @@ import {{$pkg.pkgid}} "{{$.rootDir}}/{{$pkg.pkg}}"
 
 func Start{{.appid}}(app *core.App) {
 	{{range $item := .midwares}}
-	app.MidWare("{{$.prefix}}", {{$item.pkgid}}.{{$item.method}}())
+	app.MidWare("{{$.prefix}}", {{$item.pkgid}}.{{$item.method}}({{$item.params}}))
 	{{end}}
 
 	{{range $item := .routers}}
@@ -68,5 +69,7 @@ func MakeBootFile(data map[string]interface{}) []byte {
 
 // MakeImporterFile importer file template
 func MakeImporterFile(data map[string]interface{}) []byte {
+	databyted, _ := json.Marshal(data)
+	println(string(databyted))
 	return tplCommon(data, importerTpl)
 }
