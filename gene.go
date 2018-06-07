@@ -17,13 +17,13 @@ var gene commandHandler
 
 func init() {
 	gene = func(command string, params []string) {
-		routers, midwares, pkgs := getRoutersAndMidwares()
+		routers, midwares, pkgs, ps := getRoutersAndMidwares()
 
 		// 1, update boot file
 		updateBootFile()
 
 		// 2, generate import file
-		makeImportFile(routers, midwares, pkgs)
+		makeImportFile(routers, midwares, pkgs, ps)
 	}
 	handlers["gene"] = gene
 }
@@ -70,7 +70,9 @@ func makeImportFile(
 	routers []string,
 	midwares []map[string]string,
 	pkgs []map[string]string,
+	_params *map[string][][]string,
 ) {
+	params := *_params
 	conf := getConf()
 	rd := conf.AppRoot
 	appName := pkgInfo.Name
@@ -82,21 +84,38 @@ func makeImportFile(
 	appid := strings.Replace(prefix, "/", "_", -1)
 	filename := "app" + appid
 	outputDir := importFileStr(rootRelatedString(), filename)
+
+	routersWithValidator := []string{}
+	routersNormal := []string{}
+
+	for _, router := range routers {
+		if _, ok := params[router]; ok {
+			routersWithValidator = append(routersWithValidator, router)
+		} else {
+			routersNormal = append(routersNormal, router)
+		}
+	}
+
+	hasvalidator := len(routersWithValidator) > 0
+
 	data := map[string]interface{}{
-		"routers":  routers,
-		"appName":  appName,
-		"pkgDir":   pkgDir, // subapi
-		"prefix":   prefix,
-		"appid":    appid,
-		"midwares": midwares,
-		"pkgs":     pkgs,
-		"rootDir":  rd,
+		"routers":              routersNormal,
+		"routersWithValidator": routersWithValidator,
+		"hasvalidator":         hasvalidator,
+		"appName":              appName,
+		"pkgDir":               pkgDir, // subapi
+		"prefix":               prefix,
+		"appid":                appid,
+		"midwares":             midwares,
+		"pkgs":                 pkgs,
+		"rootDir":              rd,
+		"params":               params,
 	}
 	content := g.MakeImporterFile(data)
 	ioutil.WriteFile(outputDir, content, 0644)
 }
 
-func getRoutersAndMidwares() ([]string, []map[string]string, []map[string]string) {
+func getRoutersAndMidwares() ([]string, []map[string]string, []map[string]string, *map[string][][]string) {
 	var err error
 	pkgInfo, err = build.ImportDir(".", 0)
 	if err != nil {
@@ -116,7 +135,8 @@ func getRoutersAndMidwares() ([]string, []map[string]string, []map[string]string
 	}
 	a := gintance.OutputRouters()
 	b, c := gintance.OutputMidwares()
-	return a, b, c
+	d := gintance.OutputParams()
+	return a, b, c, d
 }
 
 var root string

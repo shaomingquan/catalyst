@@ -15,11 +15,16 @@ var (
 	fset     = token.NewFileSet()
 	routers  = routerItemMap{}
 	midwares = midwareItemSet{}
+	params   = paramsMap{}
 )
 
 // Collect every _ file do this
 func (g *Gene) Collect(f *ast.File) {
 	traverseCallback := func(name, t string, appends interface{}) {
+
+		if len(name) <= 8 { // seems all less than 8
+			return
+		}
 
 		if name == "MiddlewaresComposer" {
 			mids := appends.([]string)
@@ -27,6 +32,10 @@ func (g *Gene) Collect(f *ast.File) {
 				midwares.collect(mid)
 			}
 			return
+		}
+
+		if name[:8] == "ParamsOf" {
+			params.collect(name[8:], appends.([][]string))
 		}
 
 		if strings.HasPrefix(name, "PrefixOf") {
@@ -53,6 +62,11 @@ func (g *Gene) OutputRouters() []string {
 // OutputMidwares output midware ast result
 func (g *Gene) OutputMidwares() ([]map[string]string, []map[string]string) {
 	return midwares.dump()
+}
+
+// OutputParams params of each router map[router]params[name, type]
+func (g *Gene) OutputParams() *map[string][][]string {
+	return params.dump()
 }
 
 // IsUnderscoreFile is _ file

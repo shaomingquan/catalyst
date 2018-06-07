@@ -17,9 +17,10 @@ type Conf struct {
 type RouteHandler func(ctx *gin.Context)
 
 type routerItem struct {
-	method  string
-	prefix  string
-	handler RouteHandler
+	method    string
+	prefix    string
+	handler   RouteHandler
+	validator RouteHandler
 }
 
 // App main
@@ -58,11 +59,13 @@ func (app *App) Router(
 	method string, // http verb list
 	prefix string, // router
 	handler RouteHandler, // handler
+	validator RouteHandler, // handler
 ) {
 	item := routerItem{
-		method:  method,
-		prefix:  prefix,
-		handler: handler,
+		method:    method,
+		prefix:    prefix,
+		handler:   handler,
+		validator: validator,
 	}
 	if _, ok := app.routers[group]; !ok {
 		app.routers[group] = []*routerItem{}
@@ -123,21 +126,25 @@ func (app *App) Start() {
 				if method == "GET" {
 					engine.GET(
 						router.prefix,
+						gin.HandlerFunc(router.validator),
 						gin.HandlerFunc(router.handler),
 					)
 				} else if method == "POST" {
 					engine.POST(
 						router.prefix,
+						gin.HandlerFunc(router.validator),
 						gin.HandlerFunc(router.handler),
 					)
 				} else if method == "PUT" {
 					engine.PUT(
 						router.prefix,
+						gin.HandlerFunc(router.validator),
 						gin.HandlerFunc(router.handler),
 					)
 				} else if method == "DELETE" {
 					engine.DELETE(
 						router.prefix,
+						gin.HandlerFunc(router.validator),
 						gin.HandlerFunc(router.handler),
 					)
 				} else {

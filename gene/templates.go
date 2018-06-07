@@ -28,15 +28,50 @@ func init() {
 
 var importerTpl = `package imports
 
+import "github.com/gin-gonic/gin"
 import core "github.com/shaomingquan/webcore/core"
+{{if $.hasvalidator}}
+import validator "gopkg.in/validator.v2"
+import gene "github.com/shaomingquan/webcore/gene"
+{{end}}
 import "{{.rootDir}}{{.pkgDir}}"
 {{range $pkg := .pkgs}}
 import {{$pkg.pkgid}} "{{$.rootDir}}/{{$pkg.pkg}}"
 {{end}}
 
 func Start{{.appid}}(app *core.App) {
+
+	{{range $key, $item := .params}}
+	var paramsValidatorOf{{$key}} = func(
+		ctx *gin.Context,
+	) {
+		// validate
+		paramsInstance := demo.ParamsOf{{$key}} {
+			{{range $param := $item}}
+			gene.ParamTo{{index $param 1}}(ctx.Query("{{index $param 0}}")),
+			{{end}}
+		}
+		if err := validator.Validate(paramsInstance); err != nil {
+			ctx.JSON(400, err.Error())
+		} else {
+			ctx.Next()
+		}
+	}
+	{{end}}
+
 	{{range $item := .midwares}}
 	app.MidWare("{{$.prefix}}", {{$item.pkgid}}.{{$item.method}}({{$item.params}}))
+	{{end}}
+
+
+	{{range $item := .routersWithValidator}}
+	app.Router(
+		"{{$.prefix}}",
+		{{$.appName}}.MethodOf{{$item}}, 
+		{{$.appName}}.PrefixOf{{$item}}, 
+		{{$.appName}}.HandlerOf{{$item}},
+		paramsValidatorOf{{$item}},
+	)
 	{{end}}
 
 	{{range $item := .routers}}
@@ -45,6 +80,7 @@ func Start{{.appid}}(app *core.App) {
 		{{$.appName}}.MethodOf{{$item}}, 
 		{{$.appName}}.PrefixOf{{$item}}, 
 		{{$.appName}}.HandlerOf{{$item}},
+		func(ctx *gin.Context) { ctx.Next() },
 	)
 	{{end}}
 }

@@ -36,8 +36,31 @@ func walkDeclList(list []ast.Decl, fn traverseFunc) {
 // 暂时无法识别多赋值
 func parseNameFromGenDecl(node *ast.GenDecl) (string, interface{}) {
 	specVal, ok := node.Specs[0].(*ast.ValueSpec)
-	if !ok {
-		return "", nil
+	if !ok { // it is params spec
+		specType, ok := node.Specs[0].(*ast.TypeSpec)
+
+		if !ok {
+			return "", nil
+		}
+		name := specType.Name.Name
+
+		if len(name) <= 8 || name[:8] != "ParamsOf" {
+			return "", nil
+		}
+
+		types := specType.Type.(*ast.StructType).Fields.List
+
+		ret := [][]string{}
+
+		for _, tp := range types {
+			n := toSnakeCase(tp.Names[0].Name)
+			t := tp.Type.(*ast.Ident).Name
+
+			r := []string{n, t}
+			ret = append(ret, r)
+		}
+
+		return name, ret
 	}
 
 	name := specVal.Names[0].Name
