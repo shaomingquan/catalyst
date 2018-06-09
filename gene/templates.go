@@ -31,6 +31,7 @@ var importerTpl = `package imports
 import "github.com/gin-gonic/gin"
 import core "github.com/shaomingquan/webcore/core"
 {{if $.hasvalidator}}
+import "net/http"
 import validator "gopkg.in/validator.v2"
 import gene "github.com/shaomingquan/webcore/gene"
 {{end}}
@@ -47,12 +48,12 @@ func Start{{.appid}}(app *core.App) {
 	) {
 		// validate
 		paramsInstance := demo.ParamsOf{{$key}} {
-			{{range $param := $item}}
-			gene.ParamTo{{index $param 1}}(ctx.Query("{{index $param 0}}")),
+			{{range $param := $item}}gene.ParamTo{{index $param 1}}(ctx, "{{index $param 0}}"),
 			{{end}}
 		}
 		if err := validator.Validate(paramsInstance); err != nil {
 			ctx.JSON(400, err.Error())
+			ctx.AbortWithStatus(http.StatusBadRequest)
 		} else {
 			ctx.Next()
 		}
