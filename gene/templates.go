@@ -86,10 +86,9 @@ func Start{{.appid}}(app *core.App) {
 		"{{$.prefix}}",
 		{{$.appName}}.MethodOf{{$item}}, 
 		{{$.appName}}.PrefixOf{{$item}}, 
-		{{$.appName}}.HandlerOf{{$item}},
-		{{range $decorator := index $.decorators $item}}
-		{{$decorator.pkgid}}.{{$decorator.method}}({{$decorator.params}}),
+		{{range $decorator := index $.decorators $item}}{{$decorator.pkgid}}.{{$decorator.method}}({{$decorator.params}}),
 		{{end}}
+		{{$.appName}}.HandlerOf{{$item}},
 		func(ctx *gin.Context) { ctx.Next() },
 	)
 	{{end}}
