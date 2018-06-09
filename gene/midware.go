@@ -14,8 +14,7 @@ type middwareItem struct {
 
 type midwareItemSet []middwareItem
 
-func (mset *midwareItemSet) collect(str string) {
-
+func parseMiddware(str string) *middwareItem {
 	if !strings.Contains(str, "@") {
 		log.Fatal("bad middware schema " + str)
 	}
@@ -50,7 +49,14 @@ func (mset *midwareItemSet) collect(str string) {
 		mid = mid[1:]
 	}
 
-	*mset = append(*mset, middwareItem{mid, pkg, method, params})
+	return &middwareItem{mid, pkg, method, params}
+}
+
+func (mset *midwareItemSet) collect(str string) {
+
+	midItem := parseMiddware(str)
+
+	*mset = append(*mset, *midItem)
 }
 
 func (mset *midwareItemSet) dump() ([]map[string]string, []map[string]string) {

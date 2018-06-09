@@ -14,13 +14,11 @@ type Conf struct {
 }
 
 // RouteHandler callback func
-type RouteHandler func(ctx *gin.Context)
 
 type routerItem struct {
-	method    string
-	prefix    string
-	handler   RouteHandler
-	validator RouteHandler
+	method   string
+	prefix   string
+	handlers []gin.HandlerFunc
 }
 
 // App main
@@ -58,14 +56,12 @@ func (app *App) Router(
 	group string,
 	method string, // http verb list
 	prefix string, // router
-	handler RouteHandler, // handler
-	validator RouteHandler, // handler
+	handlers ...gin.HandlerFunc,
 ) {
 	item := routerItem{
-		method:    method,
-		prefix:    prefix,
-		handler:   handler,
-		validator: validator,
+		method:   method,
+		prefix:   prefix,
+		handlers: handlers,
 	}
 	if _, ok := app.routers[group]; !ok {
 		app.routers[group] = []*routerItem{}
@@ -122,30 +118,31 @@ func (app *App) Start() {
 		}
 		for _, router := range app.routers[group] {
 			verbs := parseHTTPVerbs(router.method)
+			ginHanlders := []gin.HandlerFunc{}
+			// for _, handler := range router.handlers {
+			// 	ginHanlders = append(ginHanlders, gin.HandlerFunc(handler))
+			// }
+			ginHanlders = router.handlers
 			for _, method := range verbs {
 				if method == "GET" {
 					engine.GET(
 						router.prefix,
-						gin.HandlerFunc(router.validator),
-						gin.HandlerFunc(router.handler),
+						ginHanlders...,
 					)
 				} else if method == "POST" {
 					engine.POST(
 						router.prefix,
-						gin.HandlerFunc(router.validator),
-						gin.HandlerFunc(router.handler),
+						ginHanlders...,
 					)
 				} else if method == "PUT" {
 					engine.PUT(
 						router.prefix,
-						gin.HandlerFunc(router.validator),
-						gin.HandlerFunc(router.handler),
+						ginHanlders...,
 					)
 				} else if method == "DELETE" {
 					engine.DELETE(
 						router.prefix,
-						gin.HandlerFunc(router.validator),
-						gin.HandlerFunc(router.handler),
+						ginHanlders...,
 					)
 				} else {
 					panic(wrongMethodError{})

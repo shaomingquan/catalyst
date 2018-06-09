@@ -12,10 +12,11 @@ type Gene struct {
 }
 
 var (
-	fset     = token.NewFileSet()
-	routers  = routerItemMap{}
-	midwares = midwareItemSet{}
-	params   = paramsMap{}
+	fset       = token.NewFileSet()
+	routers    = routerItemMap{}
+	midwares   = midwareItemSet{}
+	params     = paramsMap{}
+	decorators = decoratorMap{}
 )
 
 // Collect every _ file do this
@@ -36,6 +37,13 @@ func (g *Gene) Collect(f *ast.File) {
 
 		if name[:8] == "ParamsOf" {
 			params.collect(name[8:], appends.([][]string))
+		}
+
+		if name[:11] == "DecoratorOf" {
+			mids := appends.([]string)
+			for _, mid := range mids {
+				decorators.collect(name[11:], mid)
+			}
 		}
 
 		if strings.HasPrefix(name, "PrefixOf") {
@@ -62,6 +70,11 @@ func (g *Gene) OutputRouters() []string {
 // OutputMidwares output midware ast result
 func (g *Gene) OutputMidwares() ([]map[string]string, []map[string]string) {
 	return midwares.dump()
+}
+
+// OutputDecorator output decorator ast result
+func (g *Gene) OutputDecorator() (map[string][]map[string]string, [][]map[string]string) {
+	return decorators.dump()
 }
 
 // OutputParams params of each router map[router]params[name, type]

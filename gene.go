@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"go/build"
 	"go/parser"
@@ -17,13 +18,15 @@ var gene commandHandler
 
 func init() {
 	gene = func(command string, params []string) {
-		routers, midwares, pkgs, ps := getRoutersAndMidwares()
+		routers, midwares, pkgs, ps, decorators, decoraorPkgs := getRoutersAndMidwares()
+
+		pkgs = mergePkgs(pkgs, decoraorPkgs)
 
 		// 1, update boot file
 		updateBootFile()
 
 		// 2, generate import file
-		makeImportFile(routers, midwares, pkgs, ps)
+		makeImportFile(routers, midwares, pkgs, ps, decorators)
 	}
 	handlers["gene"] = gene
 }
@@ -66,11 +69,29 @@ func updateBootFile() {
 	ioutil.WriteFile(bootFileStr(rootRelatedString()), []byte(bootContent), 0644)
 }
 
+func mergePkgs(midwaresPkgs []map[string]string, decoratorsPkgs [][]map[string]string) []map[string]string {
+	ret := midwaresPkgs
+	checker := map[string]bool{}
+	for _, pkg := range midwaresPkgs {
+		checker[pkg["pkgid"]] = true
+	}
+	for _, pkgs := range decoratorsPkgs {
+		for _, pkg := range pkgs {
+			if !checker[pkg["pkgid"]] {
+				ret = append(ret, pkg)
+				checker[pkg["pkgid"]] = true
+			}
+		}
+	}
+	return ret
+}
+
 func makeImportFile(
 	routers []string,
 	midwares []map[string]string,
 	pkgs []map[string]string,
 	_params *map[string][][]string,
+	decorators map[string][]map[string]string,
 ) {
 	params := *_params
 	conf := getConf()
@@ -98,6 +119,9 @@ func makeImportFile(
 
 	hasvalidator := len(routersWithValidator) > 0
 
+	ddddd, _ := json.Marshal(decorators)
+	println(string(ddddd))
+
 	data := map[string]interface{}{
 		"routers":              routersNormal,
 		"routersWithValidator": routersWithValidator,
@@ -107,6 +131,7 @@ func makeImportFile(
 		"prefix":               prefix,
 		"appid":                appid,
 		"midwares":             midwares,
+		"decorators":           decorators,
 		"pkgs":                 pkgs,
 		"rootDir":              rd,
 		"params":               params,
@@ -115,7 +140,14 @@ func makeImportFile(
 	ioutil.WriteFile(outputDir, content, 0644)
 }
 
-func getRoutersAndMidwares() ([]string, []map[string]string, []map[string]string, *map[string][][]string) {
+func getRoutersAndMidwares() (
+	[]string,
+	[]map[string]string,
+	[]map[string]string,
+	*map[string][][]string,
+	map[string][]map[string]string,
+	[][]map[string]string,
+) {
 	var err error
 	pkgInfo, err = build.ImportDir(".", 0)
 	if err != nil {
@@ -136,7 +168,8 @@ func getRoutersAndMidwares() ([]string, []map[string]string, []map[string]string
 	a := gintance.OutputRouters()
 	b, c := gintance.OutputMidwares()
 	d := gintance.OutputParams()
-	return a, b, c, d
+	e, f := gintance.OutputDecorator()
+	return a, b, c, d, e, f
 }
 
 var root string

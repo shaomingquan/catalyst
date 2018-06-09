@@ -61,7 +61,10 @@ func Start{{.appid}}(app *core.App) {
 	{{end}}
 
 	{{range $item := .midwares}}
-	app.MidWare("{{$.prefix}}", {{$item.pkgid}}.{{$item.method}}({{$item.params}}))
+	app.MidWare(
+		"{{$.prefix}}", 
+		{{$item.pkgid}}.{{$item.method}}({{$item.params}}),
+	)
 	{{end}}
 
 
@@ -71,6 +74,9 @@ func Start{{.appid}}(app *core.App) {
 		{{$.appName}}.MethodOf{{$item}}, 
 		{{$.appName}}.PrefixOf{{$item}}, 
 		{{$.appName}}.HandlerOf{{$item}},
+		{{range $decorator := index $.decorators $item}}
+		{{$decorator.pkgid}}.{{$decorator.method}}({{$decorator.params}}),
+		{{end}}
 		paramsValidatorOf{{$item}},
 	)
 	{{end}}
@@ -81,6 +87,9 @@ func Start{{.appid}}(app *core.App) {
 		{{$.appName}}.MethodOf{{$item}}, 
 		{{$.appName}}.PrefixOf{{$item}}, 
 		{{$.appName}}.HandlerOf{{$item}},
+		{{range $decorator := index $.decorators $item}}
+		{{$decorator.pkgid}}.{{$decorator.method}}({{$decorator.params}}),
+		{{end}}
 		func(ctx *gin.Context) { ctx.Next() },
 	)
 	{{end}}
