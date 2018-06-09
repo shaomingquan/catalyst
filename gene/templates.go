@@ -47,7 +47,7 @@ func Start{{.appid}}(app *core.App) {
 		ctx *gin.Context,
 	) {
 		// validate
-		paramsInstance := demo.ParamsOf{{$key}} {
+		paramsInstance := {{$.appName}}.ParamsOf{{$key}} {
 			{{range $param := $item}}gene.ParamTo{{index $param 1}}(ctx, "{{index $param 0}}"),
 			{{end}}
 		}
@@ -55,6 +55,7 @@ func Start{{.appid}}(app *core.App) {
 			ctx.JSON(400, err.Error())
 			ctx.AbortWithStatus(http.StatusBadRequest)
 		} else {
+			ctx.Set("xParams", &paramsInstance)
 			ctx.Next()
 		}
 	}
@@ -73,11 +74,11 @@ func Start{{.appid}}(app *core.App) {
 		"{{$.prefix}}",
 		{{$.appName}}.MethodOf{{$item}}, 
 		{{$.appName}}.PrefixOf{{$item}}, 
-		{{$.appName}}.HandlerOf{{$item}},
 		{{range $decorator := index $.decorators $item}}
 		{{$decorator.pkgid}}.{{$decorator.method}}({{$decorator.params}}),
 		{{end}}
 		paramsValidatorOf{{$item}},
+		{{$.appName}}.HandlerOf{{$item}},
 	)
 	{{end}}
 
