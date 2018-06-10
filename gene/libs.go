@@ -19,16 +19,16 @@ func toSnakeCase(str string) string {
 }
 
 func fetchParam(ctx *gin.Context, name string) interface{} {
-	// 1, from  urlencoded
-	valFromUrlencoded := ctx.PostForm(name)
-	if valFromUrlencoded != "" {
-		return valFromUrlencoded
-	}
-
-	// 2, from query
+	// 1, from query
 	valFromQuery := ctx.Query(name)
 	if valFromQuery != "" {
 		return valFromQuery
+	}
+
+	// 2, from  urlencoded
+	valFromUrlencoded := ctx.PostForm(name)
+	if valFromUrlencoded != "" {
+		return valFromUrlencoded
 	}
 
 	// 3, from json body, when you post binary, dont use validator, make sure you are posting simple json
