@@ -114,5 +114,12 @@ func ParamTobool(ctx *gin.Context, name string) bool {
 	if ok {
 		return val
 	}
-	return false
+	valstring, ok := _val.(string)
+	zero := false
+	if valstring == "false" {
+		return false
+	} else if valstring == "true" {
+		return true
+	}
+	return zero
 }
