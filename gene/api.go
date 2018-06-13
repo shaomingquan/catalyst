@@ -35,11 +35,11 @@ func (g *Gene) Collect(f *ast.File) {
 			return
 		}
 
-		if name[:8] == "ParamsOf" {
+		if strings.HasPrefix(name, "ParamsOf") {
 			params.collect(name[8:], appends.([][]string))
 		}
 
-		if name[:11] == "DecoratorOf" {
+		if strings.HasPrefix(name, "DecoratorOf") {
 			mids := appends.([]string)
 			for _, mid := range mids {
 				decorators.collect(name[11:], mid)
