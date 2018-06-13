@@ -44,11 +44,9 @@ func fetchParam(ctx *gin.Context, name string) interface{} {
 	valsFromJson := map[string]interface{}{}
 	json.Unmarshal(jsonBody, &valsFromJson)
 
-	println(string(jsonBody))
 	valFromJson := valsFromJson[name]
 
 	stringFromJson, ok := valFromJson.(string)
-	println(stringFromJson)
 	if ok {
 		return stringFromJson
 	}
@@ -95,10 +93,19 @@ func ParamTofloat64(ctx *gin.Context, name string) float64 {
 func ParamToint(ctx *gin.Context, name string) int {
 	_val := fetchParam(ctx, name)
 	val, ok := _val.(int)
+	zero := int(0)
 	if ok {
 		return val
 	}
-	return 0
+	valstring, ok := _val.(string)
+	if ok {
+		intval, err := strconv.Atoi(valstring)
+		if err != nil {
+			return zero
+		}
+		return intval
+	}
+	return zero
 }
 
 func ParamTobool(ctx *gin.Context, name string) bool {
