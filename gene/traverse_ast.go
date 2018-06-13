@@ -64,7 +64,7 @@ func parseNameFromGenDecl(node *ast.GenDecl) (string, interface{}) {
 	}
 
 	name := specVal.Names[0].Name
-	if name == "MiddlewaresComposer" || name[:11] == "DecoratorOf" { // middware decl
+	if name == "MiddlewaresComposer" || (len(name) > 11 && name[:11] == "DecoratorOf") { // middware decl
 		list := specVal.Values[0].(*ast.CompositeLit)
 		midwares := []string{}
 		for _, exp := range list.Elts {
