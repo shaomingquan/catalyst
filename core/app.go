@@ -25,7 +25,7 @@ type routerItem struct {
 type App struct {
 	Config       *Conf
 	rootRouter   *gin.RouterGroup
-	ginEngine    *gin.Engine
+	GinEngine    *gin.Engine
 	routerGroups map[string]*gin.RouterGroup
 	routers      map[string][]*routerItem
 	midwares     map[string][]gin.HandlerFunc
@@ -44,8 +44,10 @@ func (app *App) MidWare(
 
 // Init init vars
 func (app *App) Init() {
-	app.ginEngine = gin.Default()
-	app.rootRouter = app.ginEngine.Group("/")
+	if app.GinEngine == nil { // maybe assign outer
+		app.GinEngine = gin.Default()
+	}
+	app.rootRouter = app.GinEngine.Group("/")
 	app.routerGroups = map[string]*gin.RouterGroup{}
 	app.routers = map[string][]*routerItem{}
 	app.midwares = map[string][]gin.HandlerFunc{}
@@ -155,7 +157,7 @@ func (app *App) Start() {
 		panic(noAddressError{})
 	}
 
-	app.ginEngine.Run(":" + strconv.Itoa(app.Config.Port))
+	app.GinEngine.Run(":" + strconv.Itoa(app.Config.Port))
 }
 
 func parseHTTPVerbs(method string) []string {
