@@ -74,14 +74,19 @@ func (app *App) Router(
 
 // SortedRouters asc sort by group length
 func (app *App) SortedRouters() []string {
-	_routers := [200]string{}
+	_routers := [200][]string{}
 	for group := range app.routers { // base on routers
-		_routers[len(group)] = group
+		groupSet := _routers[len(group)]
+		if groupSet == nil {
+			groupSet = []string{}
+		}
+		groupSet = append(groupSet, group)
+		_routers[len(group)] = groupSet
 	}
 	routers := []string{}
 	for _, router := range _routers {
-		if router != "" {
-			routers = append(routers, router)
+		if len(router) > 0 {
+			routers = append(routers, router...)
 		}
 	}
 	return routers
