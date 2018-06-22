@@ -115,8 +115,7 @@ func (app *App) AutoGroup(group string) *gin.RouterGroup {
 	return currentRouterGroup
 }
 
-// Start start app
-func (app *App) Start() {
+func (app *App) Prepare() {
 	sortedGroups := app.SortedRouters()
 	for _, group := range sortedGroups {
 		engine := app.AutoGroup(group)
@@ -161,7 +160,11 @@ func (app *App) Start() {
 	if app.Config.Port == 0 {
 		panic(noAddressError{})
 	}
+}
 
+// Start start app
+func (app *App) Start() {
+	app.Prepare()
 	app.GinEngine.Run(":" + strconv.Itoa(app.Config.Port))
 }
 
