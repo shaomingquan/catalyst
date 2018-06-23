@@ -42,11 +42,32 @@ func (app *App) MidWare(
 	app.midwares[group] = append(app.midwares[group], handler)
 }
 
+type AppSet []*App
+
+var Apps AppSet = []*App{}
+
+// AllRouters apps all real router
+func (apps *AppSet) AllRouters(index int) []string {
+	app := (*apps)[index]
+	ret := []string{}
+	for group, routers := range app.routers {
+		for _, router := range routers {
+			currentRouter := group + router.prefix
+			currentRouter = strings.Replace(currentRouter, "//", "/", -1)
+			ret = append(ret, currentRouter)
+		}
+	}
+	return ret
+}
+
 // Init init vars
 func (app *App) Init() {
 	if app.GinEngine == nil { // maybe assign outer
 		app.GinEngine = gin.Default()
 	}
+
+	Apps = append(Apps, app)
+
 	app.rootRouter = app.GinEngine.Group("/")
 	app.routerGroups = map[string]*gin.RouterGroup{}
 	app.routers = map[string][]*routerItem{}
