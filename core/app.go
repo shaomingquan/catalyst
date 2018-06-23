@@ -141,11 +141,10 @@ func (app *App) Prepare() {
 	for _, group := range sortedGroups {
 		engine := app.AutoGroup(group)
 		for _, midware := range app.midwares[group] {
-			if engine == app.rootRouter { // dont use root
-				app.GinEngine.Use(midware)
-			} else {
-				engine.Use(midware)
+			if engine == app.rootRouter {
+				app.GinEngine.Use(midware) // root should effect on other routers not register
 			}
+			engine.Use(midware)
 		}
 		for _, router := range app.routers[group] {
 			verbs := parseHTTPVerbs(router.method)
