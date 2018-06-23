@@ -141,36 +141,67 @@ func (app *App) Prepare() {
 	for _, group := range sortedGroups {
 		engine := app.AutoGroup(group)
 		for _, midware := range app.midwares[group] {
-			engine.Use(midware)
+			if engine == app.rootRouter { // dont use root
+				app.GinEngine.Use(midware)
+			} else {
+				engine.Use(midware)
+			}
 		}
 		for _, router := range app.routers[group] {
 			verbs := parseHTTPVerbs(router.method)
 			ginHanlders := []gin.HandlerFunc{}
-			// for _, handler := range router.handlers {
-			// 	ginHanlders = append(ginHanlders, gin.HandlerFunc(handler))
-			// }
 			ginHanlders = router.handlers
 			for _, method := range verbs {
 				if method == "GET" {
-					engine.GET(
-						router.prefix,
-						ginHanlders...,
-					)
+					if engine == app.rootRouter { // dont use root
+						app.GinEngine.GET(
+							router.prefix,
+							ginHanlders...,
+						)
+					} else {
+						engine.GET(
+							router.prefix,
+							ginHanlders...,
+						)
+					}
+
 				} else if method == "POST" {
-					engine.POST(
-						router.prefix,
-						ginHanlders...,
-					)
+					if engine == app.rootRouter { // dont use root
+						app.GinEngine.POST(
+							router.prefix,
+							ginHanlders...,
+						)
+					} else {
+						engine.POST(
+							router.prefix,
+							ginHanlders...,
+						)
+					}
 				} else if method == "PUT" {
-					engine.PUT(
-						router.prefix,
-						ginHanlders...,
-					)
+					if engine == app.rootRouter { // dont use root
+						app.GinEngine.PUT(
+							router.prefix,
+							ginHanlders...,
+						)
+					} else {
+						engine.PUT(
+							router.prefix,
+							ginHanlders...,
+						)
+					}
+
 				} else if method == "DELETE" {
-					engine.DELETE(
-						router.prefix,
-						ginHanlders...,
-					)
+					if engine == app.rootRouter { // dont use root
+						app.GinEngine.DELETE(
+							router.prefix,
+							ginHanlders...,
+						)
+					} else {
+						engine.DELETE(
+							router.prefix,
+							ginHanlders...,
+						)
+					}
 				} else {
 					panic(wrongMethodError{})
 				}
