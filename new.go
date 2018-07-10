@@ -20,7 +20,11 @@ type WebcoreConf struct {
 func init() {
 	run = func(command string, params []string) {
 
+		whole := webcoreStartAndDone("init your app")
+		var done func()
+
 		// 1, archive, unzip and rename
+		done = webcoreStartAndDone("download project template")
 		projectName := "your-awesome-project"
 		if len(params) > 0 {
 			projectName = params[0]
@@ -31,8 +35,10 @@ func init() {
 
 		newProjectCommand := getNewProjectCommand(projectName)
 		cmdexer(newProjectCommand)
+		done()
 
 		// 2, rewirte appconf.json with valid approot and appname
+		done = webcoreStartAndDone("rewrite project config")
 
 		// read origin conf
 		jsonDir := "./" + projectName + "/appconf.json"
@@ -60,6 +66,8 @@ func init() {
 			log.Fatal(err)
 		}
 		ioutil.WriteFile(jsonDir, webcoreconfNewByte, 644)
+		done()
+		whole()
 
 	}
 	handlers["new"] = run

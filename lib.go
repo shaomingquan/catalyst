@@ -3,12 +3,25 @@ package main
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 )
+
+func webcoreSay(content string) {
+	fmt.Println("[ webcore ] : " + content)
+}
+
+func webcoreStartAndDone(content string) func() {
+	webcoreSay(content + " ...start")
+	return func() {
+		webcoreSay(content + " ...done")
+		fmt.Println("")
+	}
+}
 
 func cmdexer(cmdstr string) string {
 	cmd := exec.Command("/bin/bash", "-c", cmdstr)
