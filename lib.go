@@ -2,8 +2,12 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"log"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 )
 
 func cmdexer(cmdstr string) string {
@@ -11,7 +15,9 @@ func cmdexer(cmdstr string) string {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
-	log.Fatal(err.Error())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	return out.String()
 }
 
@@ -20,6 +26,64 @@ func cmdarrexer(c string, args []string) string {
 	var out bytes.Buffer
 	cmd.Stdout = &out
 	err := cmd.Run()
-	log.Fatal(err.Error())
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 	return out.String()
+}
+
+func pwd() string {
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return dir
+}
+
+func myGopath() []string {
+	gopathString := os.Getenv("GOPATH")
+	gopathes := strings.Split(gopathString, ":")
+	return gopathes
+}
+
+func getMyWordDir(projectName string) string {
+	pwd := pwd()
+	gopathes := myGopath()
+
+	workdirPrefix := ""
+
+	for _, gopath := range gopathes {
+
+		srcdir := ""
+		if endWithSlash(gopath) {
+			srcdir = gopath + "src/"
+		} else {
+			srcdir = gopath + "/src/"
+		}
+
+		if strings.HasPrefix(pwd, srcdir) {
+			workdirPrefix = pwd[len(srcdir):]
+			break
+		}
+	}
+
+	if workdirPrefix == "" {
+		log.Fatal(errors.New("play under your gopath src dir please"))
+	}
+
+	if !endWithSlash(workdirPrefix) {
+		workdirPrefix = workdirPrefix + "/"
+	}
+
+	return workdirPrefix + projectName
+}
+
+func endWithSlash(str string) bool {
+	if str == "" {
+		return false
+	}
+	if str[len(str)-1] == '/' {
+		return true
+	}
+	return false
 }
