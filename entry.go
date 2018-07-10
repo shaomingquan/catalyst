@@ -24,6 +24,10 @@ func main() {
 		params = os.Args[2:]
 	}
 
-	handlers[command](command, params)
+	if _, ok := handlers[command]; ok {
+		handlers[command](command, params)
+	} else {
+		log.Fatal(command + " is invalid command")
+	}
 
 }

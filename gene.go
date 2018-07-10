@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-	"flag"
 	"go/build"
 	"go/parser"
 	"go/token"
@@ -33,7 +31,6 @@ func init() {
 
 var (
 	pkgInfo *build.Package
-	stage   = flag.String("stage", "main", "run stage")
 )
 
 func initBootFile() string {
@@ -118,9 +115,6 @@ func makeImportFile(
 	}
 
 	hasvalidator := len(routersWithValidator) > 0
-
-	ddddd, _ := json.Marshal(decorators)
-	println(string(ddddd))
 
 	data := map[string]interface{}{
 		"routers":              routersNormal,

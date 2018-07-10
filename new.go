@@ -5,6 +5,7 @@ import (
 	"flag"
 	"io/ioutil"
 	"log"
+	"os"
 )
 
 // your-awesome-app
@@ -18,7 +19,14 @@ type WebcoreConf struct {
 }
 
 func init() {
-	run = func(command string, params []string) {
+	new = func(command string, params []string) {
+
+		// params
+		port := 0
+		flag.IntVar(&port, "port", 7777, "your app port")
+		template := "simple"
+		flag.StringVar(&template, "tpl", "simple", "start template")
+		flag.CommandLine.Parse(os.Args[3:])
 
 		whole := webcoreStartAndDone("init your app")
 		var done func()
@@ -33,9 +41,17 @@ func init() {
 			projectName = "your-awesome-project"
 		}
 
-		newProjectCommand := getNewProjectCommand(projectName)
-		cmdexer(newProjectCommand)
-		done()
+		if template == "simple" {
+			newProjectCommand := getNewProjectCommand(projectName)
+			cmdexer(newProjectCommand)
+			done()
+		} else if template == "curd" {
+			newProjectCommand := getNewProjectWithAutoCurdCommand(projectName)
+			cmdexer(newProjectCommand)
+			done()
+		} else {
+			log.Fatal(template + " is invalid template name")
+		}
 
 		// 2, rewirte appconf.json with valid approot and appname
 		done = webcoreStartAndDone("rewrite project config")
@@ -53,11 +69,6 @@ func init() {
 		approot := getMyWordDir(projectName)
 		webcoreconf.Approot = approot
 		webcoreconf.Appname = projectName
-
-		// parse port, why the f**king flag dont work????
-		port := 0
-		flag.IntVar(&port, "port", 7777, "your app port")
-		flag.Parse()
 		webcoreconf.Port = port
 
 		// write new conf
@@ -70,7 +81,7 @@ func init() {
 		whole()
 
 	}
-	handlers["new"] = run
+	handlers["new"] = new
 }
 
 // normal project
@@ -80,5 +91,5 @@ func getNewProjectCommand(projectName string) string {
 
 // project with curd
 func getNewProjectWithAutoCurdCommand(projectName string) string {
-	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-curd-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-sample-master " + projectName
+	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-curd-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-curd-sample-master " + projectName
 }
