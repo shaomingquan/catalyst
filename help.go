@@ -15,14 +15,15 @@ hi!
 
 [new]    =>    create new project
 	example: webcore new your-project-name -port=8080 -tpl=curd
-		-port: app start port
+		-port: app default start port
 		-tpl: app start template
-			-tpl=curl: curl base tpl
+			-tpl=curd: curd base tpl
 
 
 [dev]    =>    run dev server
 	example: webcore dev
-        -withoutrun: only gene bootfile
+		-withoutrun: only gene bootfile
+		-port: start port
 
 
 [update] =>    update webcore runtime lib and clitool

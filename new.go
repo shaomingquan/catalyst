@@ -23,7 +23,7 @@ func init() {
 
 		// params
 		port := 0
-		flag.IntVar(&port, "port", 7777, "your app port")
+		flag.IntVar(&port, "port", 7777, "your default app port")
 		template := "simple"
 		flag.StringVar(&template, "tpl", "simple", "start template")
 		flag.CommandLine.Parse(os.Args[3:])
@@ -39,6 +39,11 @@ func init() {
 		}
 		if projectName == "" {
 			projectName = "your-awesome-project"
+		}
+
+		// 1.5, if dir exsit
+		if _, err := os.Stat("./" + projectName); err == nil {
+			log.Fatal("directory exsit: " + projectName)
 		}
 
 		if template == "simple" {
