@@ -14,10 +14,10 @@ hi!
 
 
 [new]    =>    create new project
-	example: webcore new your-project-name -port=8080 -tpl=curd
+	example: webcore new your-project-name -port=8080 -tpl=crud
 		-port: app default start port
 		-tpl: app start template
-			-tpl=curd: curd base tpl
+			-tpl=crud: crud base tpl
 
 
 [dev]    =>    run dev server

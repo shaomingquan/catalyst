@@ -50,8 +50,8 @@ func init() {
 			newProjectCommand := getNewProjectCommand(projectName)
 			cmdexer(newProjectCommand)
 			done()
-		} else if template == "curd" {
-			newProjectCommand := getNewProjectWithAutoCurdCommand(projectName)
+		} else if template == "crud" {
+			newProjectCommand := getNewProjectWithAutoCrudCommand(projectName)
 			cmdexer(newProjectCommand)
 			done()
 		} else {
@@ -94,7 +94,7 @@ func getNewProjectCommand(projectName string) string {
 	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-sample-master " + projectName
 }
 
-// project with curd
-func getNewProjectWithAutoCurdCommand(projectName string) string {
-	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-curd-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-curd-sample-master " + projectName
+// project with crud
+func getNewProjectWithAutoCrudCommand(projectName string) string {
+	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-crud-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-crud-sample-master " + projectName
 }
