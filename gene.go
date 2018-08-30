@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"go/build"
 	"go/parser"
 	"go/token"
@@ -88,8 +89,9 @@ func makeImportFile(
 	midwares []map[string]string,
 	pkgs []map[string]string,
 	_params *map[string][][]string,
-	decorators map[string][]map[string]string,
+	_decorators *map[string][]map[string]string,
 ) {
+	decorators := *_decorators
 	params := *_params
 	conf := getConf()
 	rd := conf.AppRoot
@@ -130,8 +132,20 @@ func makeImportFile(
 		"rootDir":              rd,
 		"params":               params,
 	}
+	wirteMetaFile(data) // write meta file for debug GUI
 	content := g.MakeImporterFile(data)
 	ioutil.WriteFile(outputDir, content, 0644)
+}
+
+func wirteMetaFile(data map[string]interface{}) {
+	filename := ".pkg_meta"
+	datastring, err := json.Marshal(data)
+
+	if err != nil {
+		log.Fatal("json format wrong when trying to write meta data")
+	}
+
+	ioutil.WriteFile(filename, []byte(datastring), 0644)
 }
 
 func getRoutersAndMidwares() (
@@ -139,7 +153,7 @@ func getRoutersAndMidwares() (
 	[]map[string]string,
 	[]map[string]string,
 	*map[string][][]string,
-	map[string][]map[string]string,
+	*map[string][]map[string]string,
 	[][]map[string]string,
 ) {
 	var err error
