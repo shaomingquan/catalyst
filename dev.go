@@ -18,7 +18,7 @@ func init() {
 		flag.CommandLine.Parse(os.Args[2:])
 
 		// 1, clear genfiles
-		done := webcoreStartAndDone("clear genfiles")
+		done := catalystStartAndDone("clear genfiles")
 		cmdexer(`
 			rm boot.go
 			touch boot.go
@@ -27,7 +27,7 @@ func init() {
 		done()
 
 		// 2, genfile
-		done = webcoreStartAndDone("generate boot.go and importfiles")
+		done = catalystStartAndDone("generate boot.go and importfiles")
 		cmdexer(`
 			go generate ./apps/...
 		`)
@@ -35,7 +35,7 @@ func init() {
 
 		if !withoutrun {
 			// 3, start dev
-			done = webcoreStartAndDone("start dev app")
+			done = catalystStartAndDone("start dev app")
 			if port == 0 {
 				cmdwithstdout(`
 					DEBUG=true go run *.go

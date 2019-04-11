@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	g "github.com/shaomingquan/webcore/gene"
+	g "github.com/shaomingquan/catalyst/gene"
 )
 
 var gene commandHandler

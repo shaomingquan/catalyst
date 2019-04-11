@@ -14,20 +14,20 @@ hi!
 
 
 [new]    =>    create new project
-	example: webcore new your-project-name -port=8080 -tpl=crud
+	example: catalyst new your-project-name -port=8080 -tpl=crud
 		-port: app default start port
 		-tpl: app start template
 			-tpl=crud: crud base tpl
 
 
 [dev]    =>    run dev server
-	example: webcore dev
+	example: catalyst dev
 		-withoutrun: only gene bootfile
 		-port: start port
 
 
-[update] =>    update webcore runtime lib and clitool
-	example: webcore update
+[update] =>    update catalyst runtime lib and clitool
+	example: catalyst update
 		`)
 
 	}

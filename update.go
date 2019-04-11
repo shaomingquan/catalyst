@@ -6,13 +6,13 @@ func init() {
 	update = func(command string, params []string) {
 
 		// 1, just exe sciprt
-		done := webcoreStartAndDone("update runtime libs and update webcore exe")
+		done := catalystStartAndDone("update runtime libs and update catalyst exe")
 		cmdexer(`
-			govendor fetch github.com/shaomingquan/webcore/gene
-			govendor fetch github.com/shaomingquan/webcore/core
-			govendor fetch github.com/shaomingquan/webcore
+			govendor fetch github.com/shaomingquan/catalyst/gene
+			govendor fetch github.com/shaomingquan/catalyst/core
+			govendor fetch github.com/shaomingquan/catalyst
 
-			go get github.com/shaomingquan/webcore
+			go get github.com/shaomingquan/catalyst
 		`)
 		done()
 

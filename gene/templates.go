@@ -29,11 +29,11 @@ func init() {
 var importerTpl = `package imports
 
 import "github.com/gin-gonic/gin"
-import core "github.com/shaomingquan/webcore/core"
+import core "github.com/shaomingquan/catalyst/core"
 {{if $.hasvalidator}}
 import "net/http"
 import validator "gopkg.in/validator.v2"
-import gene "github.com/shaomingquan/webcore/gene"
+import gene "github.com/shaomingquan/catalyst/gene"
 {{end}}
 import "{{.rootDir}}{{.pkgDir}}"
 {{range $pkg := .pkgs}}

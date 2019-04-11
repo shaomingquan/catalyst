@@ -32,11 +32,11 @@ func fetchParam(ctx *gin.Context, name string) interface{} {
 	}
 
 	// 3, from json body, when you post binary, dont use validator, make sure you are posting simple json
-	_jsonBody, ok := ctx.Get("webcore:jsonBodyStore")
+	_jsonBody, ok := ctx.Get("catalyst:jsonBodyStore")
 	var jsonBody []byte
 	if !ok {
 		jsonBody, _ = ctx.GetRawData()
-		ctx.Set("webcore:jsonBodyStore", jsonBody)
+		ctx.Set("catalyst:jsonBodyStore", jsonBody)
 	} else {
 		jsonBody = _jsonBody.([]byte)
 	}

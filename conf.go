@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
-	"github.com/shaomingquan/webcore/core"
+	"github.com/shaomingquan/catalyst/core"
 )
 
 var _conf core.Conf

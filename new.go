@@ -12,7 +12,7 @@ import (
 
 var new commandHandler
 
-type WebcoreConf struct {
+type catalystConf struct {
 	Appname string `json:"appname"`
 	Port    int    `json:"port"`
 	Approot string `json:""approot`
@@ -28,11 +28,11 @@ func init() {
 		flag.StringVar(&template, "tpl", "simple", "start template")
 		flag.CommandLine.Parse(os.Args[3:])
 
-		whole := webcoreStartAndDone("init your app")
+		whole := catalystStartAndDone("init your app")
 		var done func()
 
 		// 1, archive, unzip and rename
-		done = webcoreStartAndDone("download project template")
+		done = catalystStartAndDone("download project template")
 		projectName := "your-awesome-project"
 		if len(params) > 0 {
 			projectName = params[0]
@@ -59,29 +59,29 @@ func init() {
 		}
 
 		// 2, rewirte appconf.json with valid approot and appname
-		done = webcoreStartAndDone("rewrite project config")
+		done = catalystStartAndDone("rewrite project config")
 
 		// read origin conf
 		jsonDir := "./" + projectName + "/appconf.json"
-		webcoreconf := WebcoreConf{}
-		webcoreconfByte, err := ioutil.ReadFile(jsonDir)
+		catalystconf := catalystConf{}
+		catalystconfByte, err := ioutil.ReadFile(jsonDir)
 		if err != nil {
 			log.Fatal(err)
 		}
 
 		// parse workdir
-		json.Unmarshal(webcoreconfByte, &webcoreconf)
+		json.Unmarshal(catalystconfByte, &catalystconf)
 		approot := getMyWordDir(projectName)
-		webcoreconf.Approot = approot
-		webcoreconf.Appname = projectName
-		webcoreconf.Port = port
+		catalystconf.Approot = approot
+		catalystconf.Appname = projectName
+		catalystconf.Port = port
 
 		// write new conf
-		webcoreconfNewByte, err := json.Marshal(webcoreconf)
+		catalystconfNewByte, err := json.Marshal(catalystconf)
 		if err != nil {
 			log.Fatal(err)
 		}
-		ioutil.WriteFile(jsonDir, webcoreconfNewByte, 644)
+		ioutil.WriteFile(jsonDir, catalystconfNewByte, 644)
 		done()
 		whole()
 
@@ -91,10 +91,10 @@ func init() {
 
 // normal project
 func getNewProjectCommand(projectName string) string {
-	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-sample-master " + projectName
+	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/catalyst-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv catalyst-sample-master " + projectName
 }
 
 // project with crud
 func getNewProjectWithAutoCrudCommand(projectName string) string {
-	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/webcore-crud-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv webcore-crud-sample-master " + projectName
+	return "curl -o tmp.zip https://codeload.github.com/shaomingquan/catalyst-crud-sample/zip/master && unzip tmp.zip && rm tmp.zip && mv catalyst-crud-sample-master " + projectName
 }

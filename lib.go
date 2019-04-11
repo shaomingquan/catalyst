@@ -12,14 +12,14 @@ import (
 	"strings"
 )
 
-func webcoreSay(content string) {
-	fmt.Println("\033[0;32m[ webcore ]\033[0m : " + content)
+func catalystSay(content string) {
+	fmt.Println("\033[0;32m[ catalyst ]\033[0m : " + content)
 }
 
-func webcoreStartAndDone(content string) func() {
-	webcoreSay(content + " ...start")
+func catalystStartAndDone(content string) func() {
+	catalystSay(content + " ...start")
 	return func() {
-		webcoreSay(content + " ...done")
+		catalystSay(content + " ...done")
 		fmt.Println("")
 	}
 }
