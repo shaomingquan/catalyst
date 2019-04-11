@@ -78,7 +78,7 @@ func (g *Gene) OutputDecorator() (map[string][]map[string]string, [][]map[string
 }
 
 // OutputParams params of each router map[router]params[name, type]
-func (g *Gene) OutputParams() *map[string][][]string {
+func (g *Gene) OutputParams() map[string][][]string {
 	return params.dump()
 }
 

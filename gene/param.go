@@ -8,7 +8,7 @@ func (p *paramsMap) collect(router string, params [][]string) {
 	}
 }
 
-func (p *paramsMap) dump() *map[string][][]string {
+func (p *paramsMap) dump() map[string][][]string {
 	ret := map[string][][]string(*p)
-	return &ret
+	return ret
 }

@@ -88,11 +88,9 @@ func makeImportFile(
 	routers []string,
 	midwares []map[string]string,
 	pkgs []map[string]string,
-	_params *map[string][][]string,
-	_decorators *map[string][]map[string]string,
+	params map[string][][]string,
+	decorators map[string][]map[string]string,
 ) {
-	decorators := *_decorators
-	params := *_params
 	conf := getConf()
 	rd := conf.AppRoot
 	appName := pkgInfo.Name
@@ -152,8 +150,8 @@ func getRoutersAndMidwares() (
 	[]string,
 	[]map[string]string,
 	[]map[string]string,
-	*map[string][][]string,
-	*map[string][]map[string]string,
+	map[string][][]string,
+	map[string][]map[string]string,
 	[][]map[string]string,
 ) {
 	var err error
